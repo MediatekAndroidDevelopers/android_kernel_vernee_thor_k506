@@ -1,0 +1,103 @@
+diff --git a/arch/arm64/boot/dts/k06td_a.dts b/arch/arm64/boot/dts/k06td_a.dts
+index 9b793ad..6a22037 100644
+--- a/arch/arm64/boot/dts/k06td_a.dts
++++ b/arch/arm64/boot/dts/k06td_a.dts
+@@ -833,7 +833,7 @@ memory@00000000 {
+ 
+ 			/* Battery Temperature Protection */
+ 			mtk_temperature_recharge_support = <1 >;
+-			max_charge_temperature = <55 >;
++			max_charge_temperature = <65 >;
+ 			max_charge_temperature_minus_x_degree = <47 >;
+ 			min_charge_temperature = <0 >;
+ 			min_charge_temperature_plus_x_degree = <6 >;
+diff --git a/arch/arm64/boot/dts/k06te_a.dts b/arch/arm64/boot/dts/k06te_a.dts
+index 2ba41e1..ec4a492 100644
+--- a/arch/arm64/boot/dts/k06te_a.dts
++++ b/arch/arm64/boot/dts/k06te_a.dts
+@@ -848,7 +848,7 @@ memory@00000000 {
+ 
+ 			/* Battery Temperature Protection */
+ 			mtk_temperature_recharge_support = <1 >;
+-			max_charge_temperature = <55 >;
++			max_charge_temperature = <65 >;
+ 			max_charge_temperature_minus_x_degree = <47 >;
+ 			min_charge_temperature = <0 >;
+ 			min_charge_temperature_plus_x_degree = <6 >;
+diff --git a/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_6311buck.c b/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_6311buck.c
+index e044edb..d163609 100644
+--- a/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_6311buck.c
++++ b/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_6311buck.c
+@@ -317,9 +317,9 @@ static int ts6311_sysrst_set_cur_state(struct thermal_cooling_device *cdev, unsi
+ 		pr_debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+ 
+ #ifndef CONFIG_ARM64
+-		BUG();
++		//BUG();
+ #else
+-		*(unsigned int *)0x0 = 0xdead;	/* To trigger data abort to reset the system for thermal protection. */
++		//*(unsigned int *)0x0 = 0xdead;	/* To trigger data abort to reset the system for thermal protection. */
+ #endif
+ 	}
+ 	return 0;
+diff --git a/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_battery.c b/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_battery.c
+index 9f8c162..5545303 100644
+--- a/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_battery.c
++++ b/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_battery.c
+@@ -378,7 +378,7 @@ static int tsbat_sysrst_set_cur_state(struct thermal_cooling_device *cdev, unsig
+ 
+ /* BUG(); */
+ 		/* arch_reset(0,NULL); */
+-		*(unsigned int *)0x0 = 0xdead;	/* To trigger data abort to reset the system for thermal protection. */
++	//	*(unsigned int *)0x0 = 0xdead;	/* To trigger data abort to reset the system for thermal protection. */
+ 	}
+ 	return 0;
+ }
+diff --git a/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_pa.c b/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_pa.c
+index c23203c..2c55b0f 100644
+--- a/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_pa.c
++++ b/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_pa.c
+@@ -383,7 +383,7 @@ static int tspa_sysrst_set_cur_state(struct thermal_cooling_device *cdev, unsign
+ 		pr_debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+ 
+ /* BUG(); */
+-		*(unsigned int *)0x0 = 0xdead;	/* To trigger data abort to reset the system for thermal protection. */
++		//*(unsigned int *)0x0 = 0xdead;	/* To trigger data abort to reset the system for thermal protection. */
+ 		/* arch_reset(0,NULL); */
+ 	}
+ 	return 0;
+diff --git a/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_pmic.c b/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_pmic.c
+index 56a2f41..e805a2a 100644
+--- a/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_pmic.c
++++ b/drivers/misc/mediatek/thermal/common/thermal_zones/mtk_ts_pmic.c
+@@ -237,7 +237,7 @@ static int tspmic_sysrst_set_cur_state(struct thermal_cooling_device *cdev, unsi
+ 		mtktspmic_info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+ 
+ /* BUG(); */
+-		*(unsigned int *)0x0 = 0xdead;	/* To trigger data abort to reset the system for thermal protection. */
++		//*(unsigned int *)0x0 = 0xdead;	/* To trigger data abort to reset the system for thermal protection. */
+ 		/* arch_reset(0,NULL); */
+ 	}
+ 	return 0;
+diff --git a/drivers/power/mediatek/battery_common.c b/drivers/power/mediatek/battery_common.c
+index 5417bbc..000e784 100644
+--- a/drivers/power/mediatek/battery_common.c
++++ b/drivers/power/mediatek/battery_common.c
+@@ -2717,7 +2717,7 @@ static void mt_battery_thermal_check(void)
+ #if defined(CONFIG_MTK_JEITA_STANDARD_SUPPORT)
+ 		/* ignore default rule */
+ #else
+-		if (BMT_status.temperature >= 60) {
++		if (BMT_status.temperature >= 1000) {
+ #if defined(CONFIG_POWER_EXT)
+ 			battery_log(BAT_LOG_CRTI,
+ 				    "[BATTERY] CONFIG_POWER_EXT, no update battery update power down.\n");
+@@ -2734,7 +2734,7 @@ static void mt_battery_thermal_check(void)
+ 					struct power_supply *bat_psy = &bat_data->psy;
+ 
+ 					battery_log(BAT_LOG_CRTI,
+-						    "[Battery] Tbat(%d)>=60, system need power down.\n",
++						    "[Battery] Tbat(%d)>=1000, system need power down.\n",
+ 						    BMT_status.temperature);
+ 
+ 					bat_data->BAT_CAPACITY = 0;
