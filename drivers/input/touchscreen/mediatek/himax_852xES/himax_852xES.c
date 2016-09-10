@@ -99,7 +99,7 @@ static int himax_chip_self_test_M(uint8_t valuebuf[16]);
 static ssize_t himax_chip_self_test_function(struct device *dev, struct device_attribute *attr, char *buf);
 #endif
 
-
+extern bool display_off;
 /*
 
 #if defined( CONFIG_FB)
@@ -2122,9 +2122,9 @@ static int himax_parse_wake_event(struct himax_ts_data *ts)
 static void himax_ts_button_func(int tp_key_index,struct himax_ts_data *ts)
 {
 	uint16_t x_position = 0, y_position = 0;
-if ( tp_key_index != 0x00)
+if ( tp_key_index != 0x00 && !display_off)
 	{
-		I("virtual key index =%x\n",tp_key_index);
+		I("virtual key index =%x\n",tp_key_index); //TODO: disable virtual hardware buttons (menu, home, back)
 		if ( tp_key_index == 0x04) {
 			vk_press = 1;
 			I("back key pressed\n");
