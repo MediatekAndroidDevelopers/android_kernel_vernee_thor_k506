@@ -919,22 +919,6 @@ static struct cfg80211_ops mtk_wlan_ops = {
 };
 
 static const struct wiphy_vendor_command mtk_wlan_vendor_ops[] = {
-        {
-         {
-         .vendor_id = GOOGLE_OUI,
-         .subcmd = WIFI_SUBCMD_GET_CHANNEL_LIST
-         },
-        .flags = WIPHY_VENDOR_CMD_NEED_WDEV | WIPHY_VENDOR_CMD_NEED_NETDEV,
-        .doit = mtk_cfg80211_vendor_get_channel_list
-        },
-        {
-         {
-         .vendor_id = GOOGLE_OUI,
-         .subcmd = WIFI_SUBCMD_SET_COUNTRY_CODE
-         },
-        .flags = WIPHY_VENDOR_CMD_NEED_WDEV | WIPHY_VENDOR_CMD_NEED_NETDEV,
-        .doit = mtk_cfg80211_vendor_set_country_code
-        },
 	{
 	 {
 	  .vendor_id = GOOGLE_OUI,
@@ -971,12 +955,12 @@ static const struct wiphy_vendor_command mtk_wlan_vendor_ops[] = {
 	  .subcmd = GSCAN_SUBCMD_GET_SCAN_RESULTS},
 	 .flags = WIPHY_VENDOR_CMD_NEED_WDEV | WIPHY_VENDOR_CMD_NEED_NETDEV,
 	 .doit = mtk_cfg80211_vendor_get_scan_results},
-	/*{
+	{
 	 {
 	  .vendor_id = GOOGLE_OUI,
 	  .subcmd = GSCAN_SUBCMD_GET_CHANNEL_LIST},
 	 .flags = WIPHY_VENDOR_CMD_NEED_WDEV | WIPHY_VENDOR_CMD_NEED_NETDEV,
-	 .doit = mtk_cfg80211_vendor_get_channel_list},*/
+	 .doit = mtk_cfg80211_vendor_get_channel_list},
 	{
 	 {
 	  .vendor_id = GOOGLE_OUI,
@@ -2164,7 +2148,7 @@ VOID wlanUpdateChannelTable(P_GLUE_INFO_T prGlueInfo)
 
 	/* 2. Get current domain channel list */
 	rlmDomainGetChnlList(prGlueInfo->prAdapter,
-			     BAND_NULL, FALSE,
+			     BAND_NULL,
 			     ARRAY_SIZE(mtk_2ghz_channels) + ARRAY_SIZE(mtk_5ghz_channels),
 			     &ucNumOfChannel, aucChannelList);
 

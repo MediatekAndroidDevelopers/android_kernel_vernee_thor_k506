@@ -762,25 +762,6 @@ static struct cfg80211_ops mtk_p2p_config_ops = {
 #endif
 };
 
-static const struct wiphy_vendor_command mtk_p2p_vendor_ops[] = {
-	{
-		{
-			.vendor_id = GOOGLE_OUI,
-			.subcmd = WIFI_SUBCMD_GET_CHANNEL_LIST
-		},
-		.flags = WIPHY_VENDOR_CMD_NEED_WDEV | WIPHY_VENDOR_CMD_NEED_NETDEV,
-		.doit = mtk_cfg80211_vendor_get_channel_list
-	},
-	{
-		{
-			.vendor_id = GOOGLE_OUI,
-			.subcmd = WIFI_SUBCMD_SET_COUNTRY_CODE
-		},
-		.flags = WIPHY_VENDOR_CMD_NEED_WDEV | WIPHY_VENDOR_CMD_NEED_NETDEV,
-		.doit = mtk_cfg80211_vendor_set_country_code
-	},
-};
-
 /* There isn't a lot of sense in it, but you can transmit anything you like */
 static const struct ieee80211_txrx_stypes
 mtk_cfg80211_default_mgmt_stypes[NUM_NL80211_IFTYPES] = {
@@ -1344,7 +1325,7 @@ VOID p2pUpdateChannelTableByDomain(P_GLUE_INFO_T prGlueInfo)
 		mtk_5ghz_a_channels[i].orig_flags |= IEEE80211_CHAN_DISABLED;
 	}
 	/* 2. Get current domain channel list */
-	rlmDomainGetChnlList(prGlueInfo->prAdapter, BAND_NULL, FALSE, ucMaxChannelNum, &ucNumOfChannel, aucChannelList);
+	rlmDomainGetChnlList(prGlueInfo->prAdapter, BAND_NULL, ucMaxChannelNum, &ucNumOfChannel, aucChannelList);
 
 	/* 3. Enable specific channel based on domain channel list */
 	for (i = 0; i < ucNumOfChannel; i++) {
@@ -1413,9 +1394,6 @@ BOOLEAN glP2pCreateWirelessDevice(P_GLUE_INFO_T prGlueInfo)
 	prWiphy->max_scan_ssids = MAX_SCAN_LIST_NUM;
 	prWiphy->max_scan_ie_len = MAX_SCAN_IE_LEN;
 	prWiphy->signal_type = CFG80211_SIGNAL_TYPE_MBM;
-	
-	prWiphy->vendor_commands = mtk_p2p_vendor_ops;
-	prWiphy->n_vendor_commands = sizeof(mtk_p2p_vendor_ops) / sizeof(struct wiphy_vendor_command);
 #ifdef CONFIG_PM
 	prWiphy->wowlan = &p2p_wowlan_support;
 #endif

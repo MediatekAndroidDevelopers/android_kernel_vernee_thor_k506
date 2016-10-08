@@ -841,123 +841,68 @@ nla_put_failure:
 	return i4Status;
 }
 
-int mtk_cfg80211_vendor_get_channel_list(struct wiphy *wiphy, struct wireless_dev *wdev,
-					 const void *data, int data_len)
+int mtk_cfg80211_vendor_get_channel_list(struct wiphy *wiphy, struct wireless_dev *wdev, const void *data, int data_len)
 {
-	P_GLUE_INFO_T prGlueInfo;
+	INT_32 i4Status = -EINVAL;
 	struct nlattr *attr;
 	UINT_32 band = 0;
-	UINT_8 ucNumOfChannel, i, j;
-	RF_CHANNEL_INFO_T aucChannelList[64];
-	UINT_32 num_channels;
-	wifi_channel channels[64];
+	UINT_32 num_channel;
+	wifi_channel channels[4];
 	struct sk_buff *skb;
 
-	ASSERT(wiphy && wdev);
+	ASSERT(wiphy);
+	ASSERT(wdev);
 	if ((data == NULL) || !data_len)
-		return -EINVAL;
+		return i4Status;
+	DBGLOG(REQ, INFO, "%s for vendor command: data_len=%d \r\n", __func__, data_len);
 
 	attr = (struct nlattr *)data;
-	if (attr->nla_type == WIFI_ATTRIBUTE_BAND)
+	if (attr->nla_type == GSCAN_ATTRIBUTE_BAND)
 		band = nla_get_u32(attr);
+	DBGLOG(REQ, INFO, "get channel list: band=%d \r\n", band);
 
-	if (wdev->iftype == NL80211_IFTYPE_AP)
-		prGlueInfo = *((P_GLUE_INFO_T *) wiphy_priv(wiphy));
-	else
-		prGlueInfo = (P_GLUE_INFO_T) wiphy_priv(wiphy);
-	if (!prGlueInfo)
-		return -EFAULT;
-
-	switch (band) {
-	case 1: /* 2.4G band */
-		rlmDomainGetChnlList(prGlueInfo->prAdapter, BAND_2G4, TRUE,
-			     64, &ucNumOfChannel, aucChannelList);
-		break;
-	case 2: /* 5G band without DFS channels */
-		rlmDomainGetChnlList(prGlueInfo->prAdapter, BAND_5G, TRUE,
-			     64, &ucNumOfChannel, aucChannelList);
-		break;
-	case 4: /* 5G band DFS channels only */
-		rlmDomainGetDfsChnls(prGlueInfo->prAdapter, 64, &ucNumOfChannel, aucChannelList);
-		break;
-	default:
-		ucNumOfChannel = 0;
-		break;
-	}
-
-	kalMemZero(channels, sizeof(channels));
-	for (i = 0, j = 0; i < ucNumOfChannel; i++) {
-		/* We need to report frequency list to HAL */
-		channels[j] = nicChannelNum2Freq(aucChannelList[i].ucChannelNum) / 1000;
-		if (channels[j] == 0)
-			continue;
-		else {
-			//DBGLOG(REQ, TRACE, ("channels[%d] = %d\n", j, channels[j]));
-			printk("channels[%d] = %d\n", j, channels[j]);
-			j++;
-		}
-	}
-	num_channels = j;
-	printk("get channel list: band=%d \r\n", band);
-	skb = cfg80211_vendor_cmd_alloc_reply_skb(wiphy, sizeof(channels));
+	skb = cfg80211_vendor_cmd_alloc_reply_skb(wiphy, sizeof(wifi_channel) * 4);
 	if (!skb) {
-		//DBGLOG(REQ, ERROR, ("Allocate skb failed\n"));
-		printk("Allocate skb failed\n");
+		DBGLOG(REQ, TRACE, "%s allocate skb failed:%x\n", __func__, i4Status);
 		return -ENOMEM;
 	}
 
-	if (unlikely(nla_put_u32(skb, WIFI_ATTRIBUTE_NUM_CHANNELS, num_channels) < 0))
+	kalMemZero(channels, sizeof(wifi_channel) * 4);
+	/*rStatus = kalIoctl(prGlueInfo,
+	   wlanoidQueryStatistics,
+	   &channel,
+	   sizeof(channel),
+	   TRUE,
+	   TRUE,
+	   TRUE,
+	   FALSE,
+	   &u4BufLen); */
+
+	/* only for test */
+	num_channel = 3;
+	channels[0] = 2412;
+	channels[1] = 2413;
+	channels[2] = 2414;
+	/*NLA_PUT_U32(skb, GSCAN_ATTRIBUTE_NUM_CHANNELS, num_channel);*/
+	{
+		unsigned int __tmp = num_channel;
+
+		if (unlikely(nla_put(skb, GSCAN_ATTRIBUTE_NUM_CHANNELS,
+			sizeof(unsigned int), &__tmp) < 0))
+			goto nla_put_failure;
+	}
+
+	/*NLA_PUT(skb, GSCAN_ATTRIBUTE_CHANNEL_LIST, (sizeof(wifi_channel) * num_channel), channels);*/
+	if (unlikely(nla_put(skb, GSCAN_ATTRIBUTE_CHANNEL_LIST,
+		(sizeof(wifi_channel) * num_channel), channels) < 0))
 		goto nla_put_failure;
 
-	if (unlikely(nla_put(skb, WIFI_ATTRIBUTE_CHANNEL_LIST,
-		(sizeof(wifi_channel) * num_channels), channels) < 0))
-		goto nla_put_failure;
-
-	return cfg80211_vendor_cmd_reply(skb);
- 
+	i4Status = cfg80211_vendor_cmd_reply(skb);
+	return i4Status;
 
 nla_put_failure:
 	kfree_skb(skb);
-	return -EFAULT;
-}
-
-int mtk_cfg80211_vendor_set_country_code(struct wiphy *wiphy, struct wireless_dev *wdev,
-					 const void *data, int data_len)
-{
-	P_GLUE_INFO_T prGlueInfo;
-	WLAN_STATUS rStatus;
-	UINT_32 u4BufLen;
-	struct nlattr *attr;
-	UINT_8 country[2] = {0, 0};
-
-	ASSERT(wiphy && wdev);
-	if ((data == NULL) || (data_len == 0))
-		return -EINVAL;
-
-	attr = (struct nlattr *)data;
-	if (attr->nla_type == WIFI_ATTRIBUTE_COUNTRY_CODE) {
-		country[0] = *((PUINT_8)nla_data(attr));
-		country[1] = *((PUINT_8)nla_data(attr) + 1);
-	}
-
-	//DBGLOG(REQ, INFO, ("Set country code: %c%c, iftype=%d\n", country[0], country[1], wdev->iftype));
-	printk("Set country code: %c%c, iftype=%d\n", country[0], country[1], wdev->iftype);
-
-	if (wdev->iftype == NL80211_IFTYPE_AP)
-		prGlueInfo = *((P_GLUE_INFO_T *) wiphy_priv(wiphy));
-	else
-		prGlueInfo = (P_GLUE_INFO_T) wiphy_priv(wiphy);
-	if (!prGlueInfo)
-		return -EFAULT;
-
-	rStatus = kalIoctl(prGlueInfo, wlanoidSetCountryCode, country, 2, FALSE, FALSE, TRUE, FALSE, &u4BufLen);
-	if (rStatus != WLAN_STATUS_SUCCESS) {
-		//DBGLOG(REQ, ERROR, ("Set country code error: %x\n", rStatus));
-		printk("Set country code error: %x\n", rStatus);
-		return -EFAULT;
-	}
-
-	return 0;
+	return i4Status;
 }
 
 int mtk_cfg80211_vendor_llstats_get_info(struct wiphy *wiphy, struct wireless_dev *wdev, const void *data, int data_len)

@@ -554,20 +554,6 @@ typedef enum {
 } ANDROID_VENDOR_SUB_COMMAND;
 
 typedef enum {
-	WIFI_SUBCMD_GET_CHANNEL_LIST = VENDOR_NL80211_SUBCMD_RANGE_START,
-
-	WIFI_SUBCMD_GET_FEATURE_SET,                     /* 0x0002 */
-	WIFI_SUBCMD_GET_FEATURE_SET_MATRIX,              /* 0x0003 */
-	WIFI_SUBCMD_SET_PNO_RANDOM_MAC_OUI,              /* 0x0004 */
-	WIFI_SUBCMD_NODFS_SET,                           /* 0x0005 */
-	WIFI_SUBCMD_SET_COUNTRY_CODE,                    /* 0x0006 */
-	WIFI_SUBCMD_SET_RSSI_MONITOR,			 /* 0x0007 */
-
-	/* Add more sub commands here */
-
-} WIFI_SUB_COMMAND;
-
-typedef enum {
 
 	GSCAN_SUBCMD_GET_CAPABILITIES = ANDROID_NL80211_SUBCMD_GSCAN_RANGE_START,
 
@@ -582,28 +568,17 @@ typedef enum {
 
 	GSCAN_SUBCMD_SET_SIGNIFICANT_CHANGE_CONFIG,	/* 0x1007 */
 	GSCAN_SUBCMD_ENABLE_FULL_SCAN_RESULTS,	/* 0x1008 */
+	GSCAN_SUBCMD_GET_CHANNEL_LIST,	/* 0x1009 */
+
+	WIFI_SUBCMD_GET_FEATURE_SET,	/* 0x100A */
+	WIFI_SUBCMD_GET_FEATURE_SET_MATRIX,	/* 0x100B */
+	WIFI_SUBCMD_SET_PNO_RANDOM_MAC_OUI,	/* 0x100C */
+	WIFI_SUBCMD_NODFS_SET,	/* 0x100D */
 
 	/* Add more sub commands here */
 
 	GSCAN_SUBCMD_MAX	/* 0x100D */
-} GSCAN_SUB_COMMAND;
-
-typedef enum {
-	WIFI_ATTRIBUTE_BAND = 1,
-	WIFI_ATTRIBUTE_NUM_CHANNELS,
-	WIFI_ATTRIBUTE_CHANNEL_LIST,
-
-	WIFI_ATTRIBUTE_NUM_FEATURE_SET,
-	WIFI_ATTRIBUTE_FEATURE_SET,
-	WIFI_ATTRIBUTE_PNO_RANDOM_MAC_OUI,
-	WIFI_ATTRIBUTE_NODFS_VALUE,
-	WIFI_ATTRIBUTE_COUNTRY_CODE,
-
-	WIFI_ATTRIBUTE_MAX_RSSI,
-	WIFI_ATTRIBUTE_MIN_RSSI,
-	WIFI_ATTRIBUTE_RSSI_MONITOR_START
-
-} WIFI_ATTRIBUTE;
+} WIFI_SUB_COMMAND;
 
 enum {
 	LSTATS_SUBCMD_GET_INFO = ANDROID_NL80211_SUBCMD_LSTATS_RANGE_START,
@@ -655,9 +630,6 @@ int mtk_cfg80211_vendor_get_scan_results(struct wiphy *wiphy, struct wireless_de
 					 const void *data, int data_len);
 
 int mtk_cfg80211_vendor_get_channel_list(struct wiphy *wiphy, struct wireless_dev *wdev,
-					 const void *data, int data_len);
-					 
-int mtk_cfg80211_vendor_set_country_code(struct wiphy *wiphy, struct wireless_dev *wdev,
 					 const void *data, int data_len);
 
 int mtk_cfg80211_vendor_llstats_get_info(struct wiphy *wiphy, struct wireless_dev *wdev,

@@ -440,7 +440,7 @@ typedef struct _DOMAIN_SUBBAND_INFO {
 	UINT_8 ucChannelSpan;	/* Type: ENUM_CHNL_SPAN_T */
 	UINT_8 ucFirstChannelNum;
 	UINT_8 ucNumChannels;
-	UINT_8 fgDfs;		/* Type: BOOLEAN */
+	UINT_8 ucReserved;	/* Type: BOOLEAN (fgDfsNeeded) */
 } DOMAIN_SUBBAND_INFO, *P_DOMAIN_SUBBAND_INFO;
 
 /* Use it as all available channel list for STA */
@@ -588,11 +588,7 @@ P_DOMAIN_INFO_ENTRY rlmDomainGetDomainInfo(P_ADAPTER_T prAdapter);
 VOID
 rlmDomainGetChnlList(P_ADAPTER_T prAdapter,
 		     ENUM_BAND_T eSpecificBand,
-		     BOOLEAN fgNoDfs,
 		     UINT_8 ucMaxChannelNum, PUINT_8 pucNumOfChannel, P_RF_CHANNEL_INFO_T paucChannelList);
-		     
-VOID rlmDomainGetDfsChnls(P_ADAPTER_T prAdapter,
-			  UINT_8 ucMaxChannelNum, PUINT_8 pucNumOfChannel, P_RF_CHANNEL_INFO_T paucChannelList);
 
 VOID rlmDomainSendCmd(P_ADAPTER_T prAdapter, BOOLEAN fgIsOid);
 
