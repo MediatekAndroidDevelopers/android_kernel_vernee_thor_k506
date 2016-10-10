@@ -18,7 +18,6 @@
 *.so
 *.so.dbg
 *.mod.c
-*.i
 *.lst
 *.symtypes
 *.order
@@ -30,7 +29,6 @@
 *.xz
 *.lz4
 *.lzo
-*.patch
 *.gcno
 modules.builtin
 Module.symvers
@@ -46,7 +44,7 @@ Module.symvers
 /vmlinuz
 /System.map
 /Module.markers
-
+out/
 #
 # Debian directory (make deb-pkg)
 #
