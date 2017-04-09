@@ -979,6 +979,13 @@ int ged_log_buf_write(GED_LOG_BUF_HANDLE hLogBuf, const char __user *pszBuffer, 
     return __ged_log_buf_write(psGEDLogBuf, pszBuffer, i32Count);
 }
 
+static unsigned long __read_mostly tracing_mark_write_addr = 0;
+static inline void __mt_update_tracing_mark_write_addr(void)
+{
+        if(unlikely(0 == tracing_mark_write_addr))
+        tracing_mark_write_addr = kallsyms_lookup_name("tracing_mark_write");
+}
+
 EXPORT_SYMBOL(ged_log_buf_alloc);
 EXPORT_SYMBOL(ged_log_buf_reset);
 EXPORT_SYMBOL(ged_log_buf_get);
