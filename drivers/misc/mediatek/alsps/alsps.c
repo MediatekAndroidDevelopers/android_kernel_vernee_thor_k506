@@ -27,7 +27,7 @@ int als_data_report(struct input_dev *dev, int value, int status)
 
 int ps_data_report(struct input_dev *dev, int value, int status)
 {
-	/* ALSPS_LOG("+ps_data_report! %d, %d\n",value,status); */
+	//ALSPS_LOG("+ps_data_report! %d, %d\n",value,status);
 	input_report_rel(dev, EVENT_TYPE_PS_VALUE, (value+1));
 	input_report_rel(dev, EVENT_TYPE_PS_STATUS, status);
 	input_sync(dev);
@@ -123,7 +123,6 @@ static void ps_work_func(struct work_struct *work)
 		if (ALSPS_INVALID_VALUE != cxt->drv_data.als_data.values[0])
 			cxt->is_get_valid_ps_data_after_enable = true;
 	}
-
 	ps_data_report(cxt->idev,
 	cxt->drv_data.ps_data.values[0],
 	cxt->drv_data.ps_data.status);

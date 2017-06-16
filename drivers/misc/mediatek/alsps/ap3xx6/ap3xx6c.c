@@ -216,8 +216,6 @@ static int ap3xx6_remove(void);
 
 static int ap3xx6_init_flag = -1; /* 0<==>OK -1 <==> fail */
 
-static int current_als = -1;
-
 static struct alsps_init_info ap3xx6_init_info = {
 	.name = "ap3xx6",
 	.init = ap3xx6_local_init,
@@ -1028,12 +1026,10 @@ static int ap3xx6_get_als_value(struct ap3xx6_priv *obj, u16 als)
 		if (atomic_read(&obj->trace) & TRACE_DEBUG) {
 			APS_DBG("ALS: %05d => %05d\n", als, obj->hw->als_value[idx]);
 		}
-		current_als = obj->hw->als_value[idx];
-		return current_als;
+		return obj->hw->als_value[idx];
 	} else{
 		APS_ERR("ALS: %05d => %05d (-1)\n", als, obj->hw->als_value[idx]);
-		current_als = -1;
-		return current_als;
+		return -1;
 	}
 }
 /*----------------------------------------------------------------------------*/
@@ -1079,11 +1075,9 @@ static int ap3xx6_get_ps_value(struct ap3xx6_priv *obj, u16 ps)
 	int val=1;
 	int invalid = 0;
 
-	if (current_als > 10000) return 1; // bright light, assume far away TODO: find corret value
-
 	if (ps > atomic_read(&obj->ps_thd_val_h))
 		val = 0;	/*close*/
-	else if (ps < atomic_read(&obj->ps_thd_val_l))
+	 else if (ps < atomic_read(&obj->ps_thd_val_l))
 		val = 1;	/*far away*/
 
 	if (atomic_read(&obj->ps_suspend)) {
@@ -1281,7 +1275,7 @@ static void ap3xx6_eint_work(struct work_struct *work)
 	}
 
 	err = ap3xx6_check_and_clear_intr(obj->client);
-	if ((err < 0) || err & 0x20) {
+	if ((err < 0) /*|| err & 0x20*/) { // fix proximity sensor in bright light
 		APS_ERR("ap3xx6_eint_work check intrs: %d\n", err);
 	} else if (err & 0x01) {
 		/* ALS interrupt. User should add their code here if they want to handle ALS Int. */
