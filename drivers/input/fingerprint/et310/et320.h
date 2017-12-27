@@ -19,7 +19,7 @@
 #include <linux/gpio.h>
 
 #include <linux/spi/spi.h>
-#include <../../../../../../thor_k506/drivers/spi/mediatek/mt6735/mt_spi.h>
+#include <../../../../spi/mediatek/mt6735/mt_spi.h>
 
 /*#define FP_SPI_DEBUG*/
 #define FP_SPI_DEBUG
